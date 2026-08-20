@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Security & Breach Checker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="cyber-background"></div>
+    <div class="grid-overlay"></div>
+
+    <main class="container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="shield-badge">
+                <svg class="shield-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <path d="m9 12 2 2 4-4"/>
+                </svg>
+            </div>
+            <h1 class="title">Password Security <span class="gradient-text">Checker</span></h1>
+            <h3 class="subtitle">Real-time strength evaluation and k-Anonymity breach detection</h3>
+            
+            <div class="privacy-pill">
+                <span>Zero-Knowledge: Passwords are never stored or sent in plaintext</span>
+            </div>
+        </header>
+
+        <!-- Main Card -->
+        <section class="card glass-card">
+            <form id="checker-form" onsubmit="return false;">
+                <label for="password-input" class="input-label">Enter Target Password</label>
+                <div class="input-wrapper">
+                    <div class="input-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                    </div>
+                    <input 
+                        type="password" 
+                        id="password-input" 
+                        placeholder="Type or paste a password to audit..." 
+                        autocomplete="off" 
+                        spellcheck="false"
+                        autofocus
+                    >
+                    <button type="button" id="toggle-visibility" class="toggle-btn" title="Show/Hide password" aria-label="Toggle password visibility">
+                        <!-- Eye icon (Hidden state) -->
+                        <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        <!-- Eye off icon (Visible state) -->
+                        <svg class="icon-eye-off hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+                            <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
+                            <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+                            <line x1="2" x2="22" y1="2" y2="22"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="action-row">
+                    <button type="submit" id="check-btn" class="btn btn-primary">
+                        <span class="btn-text">Audit Password Security</span>
+                        <div class="spinner hidden"></div>
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14"/>
+                            <path d="m12 5 7 7-7 7"/>
+                        </svg>
+                    </button>
+                    <button type="button" id="clear-btn" class="btn btn-ghost" title="Clear input">Clear</button>
+                </div>
+            </form>
+
+            <div id="error-message" class="error-banner hidden"></div>
+
+            <!-- Results Section (Hidden until analyzed) -->
+            <div id="results-panel" class="results-container hidden">
+                <div class="metrics-grid">
+                    <!-- Strength Card -->
+                    <div class="metric-card" id="strength-card">
+                        <div class="metric-header">
+                            <span class="metric-title">Password Strength</span>
+                            <span class="strength-badge" id="strength-badge">--</span>
+                        </div>
+                        <div class="strength-bar-container">
+                            <div class="strength-bar-segment" id="bar-1"></div>
+                            <div class="strength-bar-segment" id="bar-2"></div>
+                            <div class="strength-bar-segment" id="bar-3"></div>
+                        </div>
+                        <div class="metric-footer" id="strength-label">Audit completed</div>
+                    </div>
+
+                    <!-- Security Score Card -->
+                    <div class="metric-card" id="score-card">
+                        <div class="metric-header">
+                            <span class="metric-title">Security Score</span>
+                            <span class="score-display"><strong id="score-val">0</strong><span class="score-max"> / 5</span></span>
+                        </div>
+                        <div class="score-meter">
+                            <div class="score-fill" id="score-fill" style="width: 0%;"></div>
+                        </div>
+                        <div class="metric-footer" id="score-rating">Calculated rating</div>
+                    </div>
+                </div>
+
+                <!-- Breach Status Card -->
+                <div class="breach-card" id="breach-card">
+                    <div class="breach-icon-wrapper" id="breach-icon-wrapper">
+                        <svg id="breach-icon-safe" class="breach-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                            <path d="m9 12 2 2 4-4"/>
+                        </svg>
+                        <svg id="breach-icon-warn" class="breach-icon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                    </div>
+                    <div class="breach-info">
+                        <h4 class="breach-title" id="breach-title">Breach Database Status</h4>
+                        <p class="breach-desc" id="breach-desc">Checking breach status...</p>
+                    </div>
+                    <div class="breach-pill" id="breach-pill">Safe</div>
+                </div>
+
+                <!-- Criteria Checklist -->
+                <div class="criteria-section">
+                    <h3 class="section-heading">Security Requirements</h3>
+                    <div class="criteria-grid">
+                        <div class="criteria-item" id="crit-length">
+                            <span class="crit-icon">○</span>
+                            <span class="crit-text">At least 10 characters</span>
+                        </div>
+                        <div class="criteria-item" id="crit-uppercase">
+                            <span class="crit-icon">○</span>
+                            <span class="crit-text">Uppercase letter (A-Z)</span>
+                        </div>
+                        <div class="criteria-item" id="crit-lowercase">
+                            <span class="crit-icon">○</span>
+                            <span class="crit-text">Lowercase letter (a-z)</span>
+                        </div>
+                        <div class="criteria-item" id="crit-number">
+                            <span class="crit-icon">○</span>
+                            <span class="crit-text">Number (0-9)</span>
+                        </div>
+                        <div class="criteria-item" id="crit-special">
+                            <span class="crit-icon">○</span>
+                            <span class="crit-text">Special character (!@#$...)</span>
+                        </div>
+                        <div class="criteria-item" id="crit-not-common">
+                            <span class="crit-icon">○</span>
+                            <span class="crit-text">Not a common password</span>
+                        </div>
+                        <div class="criteria-item" id="crit-no-repeats">
+                            <span class="crit-icon">○</span>
+                            <span class="crit-text">No repeated characters</span>
+                        </div>
+                        <div class="criteria-item" id="crit-no-sequences">
+                            <span class="crit-icon">○</span>
+                            <span class="crit-text">No predictable sequences</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feedback and Suggestions -->
+                <div class="feedback-section" id="feedback-section">
+                    <h3 class="section-heading">Suggestions & Warnings</h3>
+                    <ul class="feedback-list" id="feedback-list">
+                        <!-- Populated by JavaScript with bullet points -->
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+       
+    </main>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
