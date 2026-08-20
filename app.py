@@ -147,7 +147,7 @@ def check_password(password: str):
     # Check sequential numbers
     if not criteria["no_sequences"]:
         score = max(0, score - 1)
-        feedback.append("Avoid predictable number sequences.")
+        feedback.append("Avoid predictable alphabet/number sequences.")
 
     # Check password against breach database
     breach_count = check_pwned_password(password)
