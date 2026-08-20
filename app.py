@@ -72,7 +72,13 @@ def check_password(password: str):
         "no_repeats": not bool(re.search(r"(.)\1{2,}", password)),
         "no_sequences": not any(
             seq in password
-            for seq in ["123", "234", "345", "456", "567", "678", "789"]
+            for seq in [
+        "123", "234", "345", "456", "567", "678", "789",
+        "abc", "bcd", "cde", "def", "efg", "fgh",
+        "ghi", "hij", "ijk", "jkl", "klm", "lmn",
+        "mno", "nop", "opq", "pqr", "qrs", "rst",
+        "stu", "tuv", "uvw", "vwx", "wxy", "xyz"
+    ]
         ),
     }
 
